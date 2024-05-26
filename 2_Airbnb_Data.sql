@@ -1,5 +1,9 @@
+-- DATA CLEANING --
+
 select *
 from airbnb_data;
+
+-- I first create a staging table so as not to touch the original table
 
 create table staging_airbnb
 like airbnb_data;
@@ -14,6 +18,21 @@ from airbnb_data;
 select *
 from staging_airbnb;
 
+-- I inspect the id column to see if it is a unique identifier as basis to remove duplicates  
+
+select count(`host id`), count(distinct `host id`)
+from staging_airbnb;
+
+-- I then create a procedure to call the entire table to save time 
+
+create procedure bnb()
+select *
+from staging_airbnb;
+
+call bnb();
+
+-- I then inspect each column to standardized the data 
+
 select *
 from staging_airbnb
 where `NAME` = '';
@@ -21,15 +40,6 @@ where `NAME` = '';
 update staging_airbnb
 set `NAME` = 'Unnamed'
 where `NAME` = '';
-
-select count(`host id`), count(distinct `host id`)
-from staging_airbnb;
-
-create procedure bnb()
-select *
-from staging_airbnb;
-
-call bnb();
 
 select *
 from staging_airbnb
@@ -59,6 +69,8 @@ set `neighbourhood group` = null
 where `neighbourhood group` = '';
 
 call bnb();
+
+-- I use self-join to populated the missing data which has an existing data based on another column 
 
 select tb1.`neighbourhood group`, tb2.`neighbourhood group`
 from staging_airbnb as tb1
@@ -223,6 +235,8 @@ modify column `availability 365` int;
 
 select house_rules
 from staging_airbnb;
+
+-- Lastly, I drop the columns which are too wordy to be useful or columns with too little data
 
 alter table staging_airbnb
 drop column house_rules,
